@@ -483,3 +483,47 @@ body[data-insp="drawer"] .insp.open{transform:none}
 @media (max-width:1100px){ .path3{grid-template-columns:1fr} .p3arrow{transform:rotate(90deg)} }
 .cand-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
 @media (max-width:1280px){ .cand-grid{grid-template-columns:repeat(2,minmax(0,1fr))} }
+
+/* ── STEP 04: Problem Definition Brief */
+.brief{background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--s4);border-radius:14px;box-shadow:var(--shadow);overflow:hidden}
+.brief-h{padding:10px 16px;font-weight:800;font-size:13px;border-bottom:1px solid var(--line);color:var(--s4)}
+.brief-h small{font-weight:400;color:var(--faint);margin-left:6px}
+.bk{display:block;font-size:11.5px;font-weight:800;color:var(--faint);letter-spacing:.2px;margin-bottom:3px}
+.brief-top{padding:12px 16px;border-bottom:1px solid var(--line)}
+.brief-top p{margin:0;font-size:16.5px;font-weight:800;line-height:1.5}
+.brief-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+.bi{padding:10px 16px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);font-size:12.8px;line-height:1.55;min-width:0}
+.bi:nth-child(3n){border-right:none}
+.bi.em{background:var(--s4s)}
+.bi ul{margin:0;padding-left:16px}
+.bi .chip{margin:0 2px}
+.b-rc{display:block;text-align:left;width:100%;border:1px solid var(--s4);background:var(--surface);border-radius:8px;padding:5px 8px;font-size:12.8px;line-height:1.5;margin-bottom:4px}
+.b-rc b{color:var(--s4);margin-right:5px}
+.b-rc.sel{outline:2px solid var(--text);outline-offset:1px}
+@media (max-width:1280px){ .brief-grid{grid-template-columns:repeat(2,minmax(0,1fr))} .bi:nth-child(3n){border-right:1px solid var(--line)} .bi:nth-child(2n){border-right:none} }
+
+/* ── STEP 04: 끌고 온 것 → 밝힌 것 */
+.path4{display:grid;grid-template-columns:minmax(0,1fr) 26px minmax(0,1fr);gap:8px;align-items:stretch}
+.p4grp{border-radius:10px;padding:8px 10px 10px;min-width:0}
+.p4grp.in{background:var(--sunken);border:1px dashed var(--line2)}
+.p4grp.out{background:var(--s4s);border:1px solid var(--s4)}
+.p4lab{font-size:11px;font-weight:800;color:var(--faint);letter-spacing:.3px;margin-bottom:6px}
+.p4grp.out .p4lab{color:var(--s4)}
+.p4row{display:grid;grid-template-columns:minmax(0,1fr) 16px minmax(0,1fr) 16px minmax(0,1fr);gap:4px;align-items:start}
+.p4mid{align-self:center;text-align:center;font-size:22px;font-weight:800;color:var(--s4)}
+.p3h .n.s1{background:var(--s1)}.p3h .n.s2{background:var(--s2)}.p3h .n.s3{background:var(--s3)}.p3h .n.s4{background:var(--s4)}
+.p4sub{font-size:11px;color:var(--faint);font-weight:700;margin-top:2px}
+.p4guess{font-size:12px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 8px;line-height:1.45}
+.p4guess span{display:block;font-size:11px;font-weight:700;color:var(--faint)}
+.p4hyp{font-size:12px;background:var(--surface);border-radius:8px;padding:6px 8px;border:1px solid var(--line)}
+.p4hyp b{font-size:15px}
+.p4dots{display:flex;flex-wrap:wrap;gap:4px}
+.p4v{border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-size:11px;font-weight:700;background:var(--surface)}
+.p4v.ok{border-color:var(--good);color:var(--good);background:var(--goods)}
+.p4v.part{border-color:var(--s3);color:var(--s3)}
+.p4v.no{color:var(--bad);text-decoration:line-through}
+.p4v.unk{border-style:dashed;color:var(--muted)}
+.p4v.sel{outline:2px solid var(--text);outline-offset:1px}
+.p4guess .p4v{margin-top:4px;display:inline-block}
+@media (max-width:1500px){ .path4{grid-template-columns:1fr} .p4mid{transform:rotate(90deg)} }
+@media (max-width:900px){ .p4row{grid-template-columns:1fr} }

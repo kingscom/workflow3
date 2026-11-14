@@ -1,26 +1,84 @@
-/* STEP 02 — Workflow 진단 */
+/* STEP 02 — Workflow 진단
+   한 장의 히트맵: 가로 = Task별 Action(01 md), 세로 = 진단 영역 6개 + Issue(점수 큰 순)
+   - 영역 띠: 02 md '3. Task별 진단 요약'의 Task 점수(0~3)를 그 Task의 Action 칸에 걸쳐 표시
+   - Issue 칸: 02 md '4. Issue List'의 관련 Action = 진한 칸, '6. Action별 진단표'에서만 연결 = 연한 점
+   항목을 누르면 오른쪽 패널에 상세가 표시된다. */
 (function(){
-const {S, P, esc, md, isSel} = PI;
+const {S, P, esc, md, clip} = PI;
+
+function actNum(id){ const x = id.match(/\d+/g).map(Number); return x[0]*1000 + x[1]; }
+
+/* 01 md가 있으면 그 구조를, 없으면 Issue에 나온 Action ID로 열을 만든다 */
+function columns(p2){
+  const p1 = P('01');
+  if(p1) return p1.tasks.map(t => ({id:t.id, name:t.name, acts:t.actions.map(a => ({id:a.id, name:a.name, star:a.star}))}));
+  const all = new Set(); p2.issues.forEach(i => i.acts.forEach(a => all.add(a))); Object.keys(p2.actDiag).forEach(a => all.add(a));
+  const byT = {};
+  [...all].sort((a,b) => actNum(a) - actNum(b)).forEach(a => { const t = a.split('-')[0]; (byT[t] = byT[t] || []).push({id:a, name:a}); });
+  const heatName = id => { const r = p2.heat && p2.heat.rows.find(x => x.id === id); return r ? r.task.replace(/^T\d+\.\s*/,'') : ''; };
+  return Object.entries(byT).map(([id, acts]) => ({id, name:heatName(id), acts}));
+}
 
 PI.view = function(p){
-  let h = `<div class="card" style="margin-bottom:14px"><div class="h">종합 인사이트</div><div class="b insight md">${md(p.insight)}</div></div><div class="two w02">`;
+  const cols = columns(p);
+  const issues = p.issues.slice().sort((a,b) => b.score - a.score);
+  const main = {}, sub = {};
+  issues.forEach(is => { main[is.id] = new Set(is.acts); sub[is.id] = new Set(); });
+  Object.entries(p.actDiag).forEach(([a, d]) => d.iss.forEach(i => { if(main[i] && !main[i].has(a)) sub[i].add(a); }));
+
+  /* 선택에 따른 강조 */
+  const sel = S.sel || {};
+  const hlCols = new Set(), hlRows = new Set();
+  if(sel.type === 'issue' && main[sel.id]){ hlRows.add(sel.id); main[sel.id].forEach(a => hlCols.add(a)); sub[sel.id].forEach(a => hlCols.add(a)); }
+  if(sel.type === 'act'){ hlCols.add(sel.id); issues.forEach(is => { if(main[is.id].has(sel.id) || sub[is.id].has(sel.id)) hlRows.add(is.id); }); }
+  if(sel.type === 'task'){ const t = cols.find(c => c.id === sel.id); if(t) t.acts.forEach(a => hlCols.add(a.id)); issues.forEach(is => { if([...main[is.id], ...sub[is.id]].some(a => a.startsWith(sel.id + '-'))) hlRows.add(is.id); }); }
+  const anySel = hlCols.size || hlRows.size;
+  const colCls = (a, first) => (first ? 'first ' : '') + (hlCols.has(a) ? 'colhl' : anySel ? 'dimc' : '');
+
+  const flat = cols.flatMap(t => t.acts.map((a, i) => ({...a, task:t.id, first:i === 0})));
+  const totalCols = flat.length + 1;
+
+  let h = `<div class="ins-line ${INS_OPEN?'open':''}" id="insLine" title="눌러서 펼치기/접기"><b class="k">종합 인사이트</b><div class="md">${md(p.insight)}</div><span class="more">${INS_OPEN?'접기 ▲':'펼치기 ▼'}</span></div>`;
+  h += `<div class="hm-legend"><b style="color:var(--text)">Task·Action × 진단 히트맵</b>
+    <span><i style="background:var(--h1)"></i><i style="background:var(--h2)"></i><i style="background:var(--h3)"></i>영역 신호 1~3 (Task 단위)</span>
+    <span><i style="background:var(--gA)"></i>A등급 Issue의 관련 Action</span><span><i style="background:var(--gB)"></i>B등급</span>
+    <span><i style="background:var(--gA);opacity:.32;border-radius:50%;width:10px;height:10px"></i>Action별 진단표에서만 연결</span>
+    <span style="margin-left:auto;color:var(--faint)">Task·Action 이름이나 Issue를 누르면 연결된 칸이 강조되고 상세가 열립니다</span></div>`;
+
+  /* 표를 본문 폭에 맞춰 늘림: 이름 칸은 고정, Action 열은 남는 폭을 똑같이 나눔 */
+  h += `<div class="hm-wrap"><table class="hm"><colgroup><col class="hm-labcol">${flat.map(() => '<col>').join('')}</colgroup><thead>`;
+  /* 1행: Task 묶음 */
+  h += `<tr><th class="lab" rowspan="2">세로: 진단 영역 · Issue<br>가로: Task → Action</th>${cols.map(t =>
+    `<th class="tg ${hlCols.size && t.acts.every(a => hlCols.has(a.id)) ? 'colhl' : ''}" colspan="${t.acts.length}" data-sel="task|${t.id}" title="${esc(t.id + '. ' + t.name)}"><b>${t.id}</b>${esc(t.name)}</th>`).join('')}</tr>`;
+  /* 2행: Action 이름(세로 글씨) */
+  h += `<tr>${flat.map(a => `<th class="ah ${a.star?'star':''} ${colCls(a.id, a.first)}" data-sel="act|${a.id}" title="${esc(a.id + ' ' + a.name)}"><span>${esc(clip(a.name, 12))}</span><small>${a.id.split('-')[1]}</small></th>`).join('')}</tr></thead><tbody>`;
+
+  /* 영역 띠 */
   if(p.heat){
-    const max = Math.max(...p.heat.rows.map(r=>r.total), 1);
-    h += `<div class="card"><div class="h">Task별 신호 히트맵 <small>0 없음 ~ 3 강함 · Task를 누르면 관련 Issue만 표시</small></div><div class="b" style="overflow-x:auto"><table class="heat"><thead><tr><th>Task</th>${p.heat.areas.map(a=>`<th>${esc(a)}</th>`).join('')}<th>합계</th></tr></thead><tbody>`;
-    p.heat.rows.forEach(r => {
-      h += `<tr class="${S.filter===r.id?'on':''}"><td class="tn" data-filter="${r.id}" title="${esc(r.task)}">${esc(r.task)}</td>${r.vals.map(v=>`<td class="v${Math.max(0,Math.min(3,v||0))}">${isNaN(v)?'-':v}</td>`).join('')}<td class="tot"><span class="tbar" style="width:${Math.round(r.total/max*22)}px"></span>${r.total}</td></tr>`;
+    h += `<tr class="sec"><td colspan="${totalCols}">진단 영역 신호 <small>Task별 최고 점수 0(없음)~3(강함) · 02 md 3장</small></td></tr>`;
+    p.heat.areas.forEach((area, ai) => {
+      h += `<tr><td class="lab alab">${esc(area)}</td>${cols.map(t => {
+        const r = p.heat.rows.find(x => x.id === t.id); const v = r ? r.vals[ai] : NaN;
+        const vv = isNaN(v) ? 0 : Math.max(0, Math.min(3, v));
+        return `<td class="area v${vv} ${hlCols.size && !t.acts.some(a => hlCols.has(a.id)) ? 'dimc' : ''}" colspan="${t.acts.length}" data-sel="task|${t.id}" style="cursor:pointer">${isNaN(v) ? '' : v || ''}</td>`;
+      }).join('')}</tr>`;
     });
-    h += '</tbody></table></div></div>';
-  } else h += '<div></div>';
-  h += `<div class="card"><div class="h">Issue 우선순위 <small>점수 = (영향도×0.4 + 신호×0.3 + 개선×0.3)×20</small></div><div class="b">`;
-  p.issues.forEach(is => {
-    const dim = S.filter && !is.acts.some(a => a.startsWith(S.filter + '-'));
-    h += `<button type="button" class="irow ${dim?'dim':''} ${isSel('issue',is.id)}" data-sel="issue|${is.id}">
-      <span class="iid">${is.id}</span><span><span class="ttl">${esc(is.title)}</span><span class="area">${esc(is.area)} · ${is.acts.length}개 Action</span></span>
-      <span class="sbar"><span class="bg"><i style="width:${is.score}%;background:var(--g${is.grade})"></i></span><b>${is.score}</b><span class="tag g-${esc(is.grade)}">${esc(is.grade)}</span></span>
-      <span class="conf" title="확신도">${esc(is.conf)}</span></button>`;
+  }
+
+  /* Issue 행 */
+  h += `<tr class="sec"><td colspan="${totalCols}">Issue × Action <small>점수 큰 순 · 진한 칸 = Issue List의 관련 Action, 연한 점 = Action별 진단표에서 연결 · 02 md 4·6장</small></td></tr>`;
+  issues.forEach(is => {
+    const rowCls = hlRows.has(is.id) ? 'rowhl' : (anySel ? 'dimrow' : '');
+    h += `<tr class="${rowCls}"><td class="lab ${anySel && !hlRows.has(is.id) ? 'dimc' : ''}"><div class="ilab" data-sel="issue|${is.id}" title="${esc(is.title)}">
+      <b>${is.id}</b><span class="sc"><i style="width:${is.score}%;background:var(--g${esc(is.grade)})"></i></span><span class="tag g-${esc(is.grade)}">${is.score}</span><span class="tt">${esc(is.title)}</span></div></td>`;
+    flat.forEach(a => {
+      const m = main[is.id].has(a.id), s = sub[is.id].has(a.id);
+      const dim = anySel && !(hlRows.has(is.id) && hlCols.has(a.id));
+      h += `<td class="c ${a.first?'first':''} ${hlCols.has(a.id) && !hlRows.has(is.id) ? 'colhl' : ''} ${dim && (m||s) ? 'dimc' : ''}" ${m||s ? `data-sel="issue|${is.id}" title="${esc(is.id + ' ↔ ' + a.id + ' ' + a.name)}"` : ''}>${m ? `<i class="m-${esc(is.grade)}"></i>` : s ? `<i class="s m-${esc(is.grade)}"></i>` : ''}</td>`;
+    });
+    h += '</tr>';
   });
-  h += '</div></div></div>';
+  h += `</tbody></table></div>`;
   return h;
 };
 
@@ -28,7 +86,13 @@ PI.inspDefault = function(){
   const p2 = P('02'); if(!p2) return '';
   return `<div class="eyebrow" style="color:var(--s2)">구조 요약</div><h3>Issue ${p2.issues.length}개</h3><div class="box md" style="margin-top:10px">${md(p2.structure)}</div>
     <div class="lbl">진단의 한계</div><div class="box md">${md(p2.limits)}</div><div class="lbl">다음 단계</div><div class="box md">${md(p2.next)}</div>
-    <p style="color:var(--faint);font-size:12px;margin-top:14px">Issue를 누르면 점수 구성과 근거, 관련 Action을 볼 수 있습니다.</p>`;
+    <p style="color:var(--faint);font-size:12px;margin-top:14px">히트맵에서 Task·Action 이름이나 Issue를 누르면 여기에 상세가 표시됩니다.</p>`;
+};
+
+let INS_OPEN = false;
+PI.bind = function(root){
+  const el = root.querySelector('#insLine');
+  if(el) el.onclick = () => { INS_OPEN = !INS_OPEN; PI.rerender(); };
 };
 
 PI.start();

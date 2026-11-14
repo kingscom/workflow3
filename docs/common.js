@@ -445,6 +445,7 @@ function renderCanvas(){
   }
   c.innerHTML = h;
   bindCanvas();
+  if(PI.bind) PI.bind(c);
 }
 function emptyStage(st){
   return `<div class="card"><div class="b" style="text-align:center;padding:40px;color:var(--muted)">
@@ -485,9 +486,15 @@ function vdClass(v){ return /부분/.test(v) ? 'part' : /지지/.test(v) ? 'ok' 
 /* ---------- 7. 오른쪽 상세 패널 ---------- */
 function renderInsp(){
   const el = $('#insp'); let h = '';
+  /* data-insp="drawer" 페이지: 오른쪽 패널을 숨겨 두었다가 항목을 누를 때만 펼침 */
+  const drawer = document.body.dataset.insp === 'drawer';
+  if(drawer && !S.sel){ el.classList.remove('open'); el.innerHTML = ''; return; }
   try { h = inspHTML(); } catch(e){ console.error(e); h = `<p class="err">${esc(e.message)}</p>`; }
+  if(drawer) h = `<button type="button" class="insp-x" id="inspClose" title="닫기 (Esc)">×</button>` + h;
   el.innerHTML = h;
+  el.classList.toggle('open', drawer);
   bindSel(el);
+  const x = $('#inspClose'); if(x) x.onclick = () => { S.filter = null; select(null); };
 }
 const kv = rows => `<dl class="kvs">${rows.filter(r => r[1]).map(r => `<dt>${r[0]}</dt><dd>${r[1]}</dd>`).join('')}</dl>`;
 const link = (type, id, stage, label) => `<span class="chip link" data-sel="${type}|${id}|${stage}">${esc(label||id)}</span>`;
@@ -650,5 +657,6 @@ PI.start = function(){
 PI.load = files => { const at = new Date().toISOString(); saveCache(files, at); ingest(files, at); };
 
 /* 페이지 스크립트에서 쓰는 도구 */
+PI.rerender = () => { renderCanvas(); renderInsp(); };
 Object.assign(PI, {S, W, P, STAGES, stageOf, esc, md, inline, bget, ids, clip, isSel, countRC, vdClass, opps4, kv, link, RE_ACT, RE_ISS});
 })();

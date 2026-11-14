@@ -95,6 +95,15 @@ PI.view = function(p){
 
   /* ── 3. Root Cause Map */
   h += `<div class="card" style="margin-top:12px"><div class="h">Root Cause Map <small>04 md 2장 · ★ = Root Cause · 초록 = 지지 · 회색 취소선 = 기각 · 노드를 누르면 검증 기록</small></div><div class="b" style="overflow-x:auto">${p.tree.text ? treeHTML(p.tree) : `<pre>${esc(p.treeRaw)}</pre>`}</div></div>`;
+
+  /* ── 4. 성공 기준 */
+  if(p.crit.length){
+    h += `<div class="card" style="margin-top:12px"><div class="h">성공 기준 <small>04 md 5장 · 개선 목표 ${p.crit.filter(c => !/유지/.test(c.type)).length}개 · 유지 조건 ${p.crit.filter(c => /유지/.test(c.type)).length}개</small></div><div class="b"><table class="crit-tbl">
+      <thead><tr><th>종류</th><th>지표</th><th>현재 수준</th><th></th><th>목표</th><th>확인 방법</th></tr></thead><tbody>
+      ${p.crit.map(c => `<tr class="${/유지/.test(c.type) ? 'keep' : 'goal'}"><td><span class="ty">${esc(c.type)}</span></td><td class="m">${actChips(c.metric || '', p1)}</td>
+        <td class="now">${esc(c.now || '-')}</td><td class="ar">→</td><td class="gl">${esc(c.goal || '-')}</td><td class="how">${esc(c.how || '-')}</td></tr>`).join('')}
+      </tbody></table></div></div>`;
+  }
   return h;
 };
 function findRC(t, rc){ let r = null; (function walk(n){ if(n.rc === rc) r = n; (n.kids||[]).forEach(walk); })(t); return r; }
@@ -107,7 +116,6 @@ PI.inspDefault = function(){
   return `<div class="eyebrow" style="color:var(--s4)">검증 상태 · ${esc(W()['04'].doc.fm.status||'')}</div><h3>가설 ${hy.length}개 검토</h3>
     <div class="stack" style="height:12px;margin-top:12px"><i style="width:${ok/n*100}%;background:var(--good)"></i><i style="width:${part/n*100}%;background:var(--s3)"></i><i style="width:${no/n*100}%;background:var(--bad)"></i><i style="width:${unk/n*100}%;background:var(--line2)"></i></div>
     <div class="legend"><span><i style="background:var(--good)"></i>지지 ${ok}</span><span><i style="background:var(--s3)"></i>부분 지지 ${part}</span><span><i style="background:var(--bad)"></i>기각 ${no}</span><span><i style="background:var(--line2)"></i>미검증 ${unk}</span></div>
-    ${p4.crit.length ? `<div class="lbl">성공 기준 (5장)</div>${p4.crit.map(c => `<div class="crit"><span class="ty ${/유지/.test(c.type)?'keep':''}">${esc(c.type)}</span><span>${inline(c.metric)}<small>현재 ${esc(c.now)} → 목표 ${esc(c.goal)}</small><small>확인: ${esc(c.how||'-')}</small></span></div>`).join('')}` : ''}
     <div class="lbl">열린 사항</div><div class="box md">${md(p4.open)}</div>`;
 };
 

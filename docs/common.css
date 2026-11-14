@@ -527,3 +527,17 @@ body[data-insp="drawer"] .insp.open{transform:none}
 .p4guess .p4v{margin-top:4px;display:inline-block}
 @media (max-width:1500px){ .path4{grid-template-columns:1fr} .p4mid{transform:rotate(90deg)} }
 @media (max-width:900px){ .p4row{grid-template-columns:1fr} }
+
+/* step4 성공 기준 표 */
+.crit-tbl{width:100%;border-collapse:collapse;font-size:12.5px}
+.crit-tbl th{text-align:left;font-size:11px;font-weight:600;color:var(--faint);padding:0 10px 6px;border-bottom:1px solid var(--line)}
+.crit-tbl td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+.crit-tbl tr:last-child td{border-bottom:none}
+.crit-tbl .ty{display:inline-block;white-space:nowrap;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;background:var(--s4s);color:var(--s4)}
+.crit-tbl tr.keep .ty{background:var(--goods);color:var(--good)}
+.crit-tbl td.m{font-weight:600;color:var(--text);width:24%}
+.crit-tbl td.now{color:var(--muted);width:20%}
+.crit-tbl td.ar{color:var(--faint);width:18px;padding:9px 0}
+.crit-tbl td.gl{font-weight:600;color:var(--text);width:18%}
+.crit-tbl tr.goal td.gl{color:var(--s4)}
+.crit-tbl td.how{color:var(--muted)}

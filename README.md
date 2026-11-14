@@ -16,7 +16,7 @@
 ## 흐름
 
 ```
-01 As-Is 업무분석 → 02 Workflow 진단 → 03 문제 발굴 인터뷰 → 04 근본 원인 심층 진단 → (Execution Design)
+01 As-Is 업무분석 → 02 Workflow 진단 → 03 문제 발굴 인터뷰 → 04 근본 원인 심층 진단 → 05 수행 지식 인터뷰 → (Execution Design)
 ```
 
 | 순서 | 스킬 | 하는 일 | 산출물 |
@@ -25,6 +25,7 @@
 | 02 | [02-workflow-diagnosis-consultant](.github/skills/02-workflow-diagnosis-consultant/SKILL.md) | 모든 Action을 6개 영역별 0~100점으로 보수적으로 채점하고, 이를 문제 가설(Issue)로 묶어 개선 기회와 함께 점수화 | `output/02_diagnosis_{Workflow명}.md` |
 | 03 | [03-problem-discovery-interview](.github/skills/03-problem-discovery-interview/SKILL.md) | 문제 후보를 고객 경험으로 검증·구체화·비교해 집중 분석할 문제 1개(Target Problem)를 합의 | `output/03_target_problem_{Workflow명}.md` |
 | 04 | [04-root-cause-deep-dive](.github/skills/04-root-cause-deep-dive/SKILL.md) | 원인 가설을 세우고 실제 사례로 검증해 Root Cause Map, 개선 방향, 성공 기준을 합의 | `output/04_problem_brief_{Workflow명}.md` |
+| 05 | [05-execution-knowledge-interview](.github/skills/05-execution-knowledge-interview/SKILL.md) | 대상 Action을 담당자가 실제로 어떤 정보·지식으로 추론·판단하는지 실제 사례로 따라가 8요소(Trigger·Input·Knowledge·Inference·Decision·Exception·Output·Evidence)로 구체화하고 사례 재현으로 검증 | `output/05_execution_knowledge_{Workflow명}.md` |
 
 - 02는 선택 단계입니다. 03은 진단 보고서가 없어도 As-Is md나 인터뷰만으로 시작할 수 있습니다.
 - 파일명 앞의 숫자는 그 파일을 만든 스킬 번호입니다. `{Workflow명}`의 공백은 `_`로 바꿉니다.

@@ -19,7 +19,8 @@ description: "선정된 문제 1개(Target Problem)를 가설 기반으로 심�
 | 이전(선택) | Skill 1. Workflow Diagnosis (02-workflow-diagnosis-consultant) | `02_diagnosis_{Workflow명}.md` |
 | 이전 | Skill 2. Problem Discovery Interview (03-problem-discovery-interview) | `03_target_problem_{Workflow명}.md` |
 | **현재** | **Skill 3. Root Cause Deep Dive** | **Root Cause Map + Problem Definition Brief** |
-| 다음 | Execution Design | Task Spec, Data Design, Architecture, PRD |
+| 다음 | Skill 4. Execution Knowledge Interview (05-execution-knowledge-interview) | Verified Execution Knowledge (`output/05_execution_knowledge_{Workflow명}.md`) |
+| 이후 | Execution Design | Task Spec, Data Design, Architecture, PRD |
 
 **이 스킬이 하지 않는 것**
 - **구현 방법을 설계하지 않는다.** 도구 선정, 데이터 설계, 아키텍처, 화면, 일정은 Execution Design의 일이다. 여기서는 원인별 개선 **방향**까지만 정한다.

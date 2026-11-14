@@ -3,6 +3,16 @@
 업무(Workflow, L3) 하나를 As-Is 분석부터 근본 원인 규명까지 단계적으로 다루는 GitHub Copilot 에이전트 스킬 모음입니다.
 각 스킬은 고객(현업 담당자)과 대화하며 진행하고, 결과를 `output/` 폴더에 md로 저장합니다. 다음 스킬은 앞 스킬의 md를 입력으로 이어받습니다.
 
+## 한눈에 보기
+
+[docs/index.html](docs/index.html)을 브라우저(Chrome·Edge)로 열고 `workflow3` 폴더(또는 `output` 폴더)를 한 번 선택하면, `output/`의 실제 산출물 md와 `.github/skills/`의 SKILL.md를 읽어 시각화합니다. 한 번 불러온 내용은 모든 페이지에서 함께 씁니다.
+
+- 페이지: `index.html`(전체) · `step1.html`(업무 구조) · `step2.html`(진단) · `step3.html`(핵심 문제) · `step4.html`(근본 원인). 상단 단계 바로 이동합니다.
+- 공통 파일: `common.css`(디자인), `common.js`(파일 읽기·md 파싱·상단 바·상세 패널). 페이지별 화면은 `overview.js`, `step1.js` ~ `step4.js`에 있습니다.
+- 항목(Action, Issue, 후보, 원인 가설)을 누르면 오른쪽 패널에 상세 값과 연결된 단계가 표시됩니다.
+- 각 단계에서 `산출물 원문`, `스킬 절차` 탭으로 원본 md도 볼 수 있습니다.
+- 외부 라이브러리 없이 HTML 파일 하나로 동작하며, 파일은 브라우저 밖으로 전송되지 않습니다. md를 고친 뒤에는 `폴더 다시 불러오기`를 누릅니다.
+
 ## 흐름
 
 ```

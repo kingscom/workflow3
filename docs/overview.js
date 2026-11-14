@@ -126,7 +126,7 @@ PI.inspDefault = function(){
   let h = `<div class="eyebrow" style="color:var(--s0)">WORKFLOW</div><h3>${esc(S.wf || '-')}</h3>`;
   if(p1){ const fm = W()['01'].doc.fm; h += kv([['역할', esc(fm.owner_role)], ['상위 분류', esc(fm.l1_l2)]]) + `<div class="lbl">개요</div><div class="box md">${md(p1.overview)}</div>`; }
   h += `<div class="lbl">읽는 방법</div><div class="box" style="font-size:12.5px">위쪽은 이번에 해결할 문제와 근본 원인, 가운데는 진단 Issue와 Task별 업무 지도입니다. Task는 핵심 문제와 가까운 것, 신호가 큰 것부터 놓입니다. Issue나 Action을 누르면 여기에 상세가 표시됩니다.</div>`;
-  h += `<div class="lbl">불러온 산출물</div><div class="filelist">${['01','02','03','04'].map(n => { const e = W()[n]; return `<div><span>${n} ${e?`<code>${esc(e.doc.fm.schema||'')}</code>`:'<span style="color:var(--faint)">없음</span>'}</span><span>${e?esc(e.doc.fm.status||''):''}</span></div>`; }).join('')}</div>`;
+  h += `<div class="lbl">불러온 산출물</div><div class="filelist">${['01','02','03','04','05'].map(n => { const e = W()[n]; return `<div><span>${n} ${e?`<code>${esc(e.doc.fm.schema||'')}</code>`:'<span style="color:var(--faint)">없음</span>'}</span><span>${e?esc(e.doc.fm.status||''):''}</span></div>`; }).join('')}</div>`;
   return h;
 };
 

@@ -1,9 +1,9 @@
 /* =========================================================
    PI 분석 뷰어 — 공통 스크립트
    - 폴더에서 md 파일 읽기(한 번 선택하면 브라우저에 기억)
-   - md 파싱(산출물 01~04, SKILL.md)
+   - md 파싱(산출물 01~05, SKILL.md)
    - 상단 바·단계 바·오른쪽 상세 패널
-   페이지별 시각화는 overview.js, step1.js ~ step4.js에서
+   페이지별 시각화는 overview.js, step1.js ~ step5.js에서
    PI.view 를 정하고 PI.start()를 부른다.
    ========================================================= */
 (function(){
@@ -308,6 +308,53 @@ function p04(doc){
   const crit = stab ? stab.rows.map(r => ({type:r[0], metric:r[1], now:r[2], goal:r[3], how:r[4]})) : [];
   return {brief, tree: parseTree(code), treeRaw:code, hyps, rcs, crit, open:(sec(doc,'열린 사항')||{}).body || '', next:(sec(doc,'다음 단계')||{}).body || ''};
 }
+/* 05 Verified Execution Knowledge */
+const RE_KREC = /\b[KREFC]\d+\b/g;
+/* "R1~R6, E1" → ['R1',...,'R6','E1'] */
+function expandIds(s){
+  const out = [];
+  String(s||'').replace(/\b([KREFC])(\d+)\s*~\s*(?:\1)?(\d+)\b|\b([KREFC])(\d+)\b/g, (m, p, a, b, q, c) => {
+    if(p){ for(let i = +a; i <= +b; i++) out.push(p + i); } else out.push(q + c); return m;
+  });
+  return [...new Set(out)];
+}
+function p05(doc){
+  const tab = kw => { const s = sec(doc, kw); return s ? tables(s.body) : []; };
+  const summary = {}; (tab('요약')[0] || {rows:[]}).rows.forEach(r => summary[r[0]] = r[1]);
+  const acts = [];
+  const as = sec(doc, 'Action별 수행 지식');
+  if(as) sectionsOf(as.body, 3).forEach(x => {
+    const m = x.title.match(/^(T\d+-A\d+)\.\s*(.+?)(?:\s*\(([^)]*)\))?$/); if(!m) return;
+    const el = {}; const t = tables(x.body)[0];
+    if(t) t.rows.forEach(r => el[r[0]] = {v:r[1] || '', st:r[2] || ''});
+    const dm = x.body.match(/\*\*수행 설명\*\*\s*(\([^)]*\))?\s*\n([\s\S]*)$/);
+    acts.push({id:m[1], name:m[2], kind:m[3] || '', el, descNote:dm && dm[1] ? dm[1].replace(/[()]/g,'') : '', desc:dm ? dm[2].trim() : ''});
+  });
+  const rowsBy = (t, map) => t ? t.rows.map(r => { const o = {}; Object.entries(map).forEach(([k, kws]) => { const i = col(t.head, ...kws); o[k] = i >= 0 ? (r[i] || '') : ''; }); return o; }) : [];
+  const know = rowsBy(tab('Knowledge Map')[0], {id:['ID'], text:['지식'], kind:['종류'], where:['어디에'], doc:['문서화'], cycle:['변경 주기'], use:['쓰이는 곳']});
+  const dt = tab('Decision Map');
+  const rules = rowsBy(dt[0], {id:['ID'], cond:['조건'], res:['결과'], know:['쓰는 지식'], cs:['근거 사례'], st:['상태']});
+  const excs = rowsBy(dt[1], {id:['ID'], sit:['상황'], how:['처리'], cs:['근거 사례'], st:['상태']});
+  const ds = sec(doc, 'Decision Map') || {body:''};
+  const prio = (ds.body.match(/우선순위[:：]\s*(.+)/) || [])[1] || '';
+  const terms = (ds.body.match(/용어 정의[:：]\s*(.+)/) || [])[1] || '';
+  const cases = [];
+  const ts = sec(doc, 'Execution Trace');
+  if(ts) sectionsOf(ts.body, 3).forEach(x => { const m = x.title.match(/^(C\d+)\.\s*(.+)$/); if(m) cases.push({id:m[1], title:m[2], b:bullets(x.body)}); });
+  const tests = rowsBy(tab('검증 기록')[0], {cs:['사례'], type:['유형'], input:['상황'], pred:['AI 예측'], real:['실제 결과'], ok:['일치'], fix:['보완']}).filter(t => t.cs && t.cs !== '-');
+  return {summary, acts, know, rules, excs, prio, terms, cases, tests,
+    open:(sec(doc,'열린 사항')||{}).body || '', next:(sec(doc,'다음 단계')||{}).body || '', nextTitle:((sec(doc,'다음 단계')||{}).title || '').replace(/^\d+\.\s*/,'')};
+}
+/* 상태 표시: 확인 / 문서 / * 추정 */
+function st5(s){
+  s = String(s || ''); const g = /\*/.test(s), ok = /확인/.test(s), d = /문서/.test(s);
+  if(!s.trim()) return '';
+  if(g && (ok || d)) return 'part';
+  if(g) return 'guess';
+  if(ok) return 'ok';
+  if(d) return 'doc';
+  return '';
+}
 function parseTree(code){
   const root = {text:'', kids:[], root:true};
   const stack = [{depth:-1, node:root}];
@@ -350,7 +397,8 @@ const STAGES = [
   {id:'01', page:BASE + 'step1.html', label:'STEP 01', name:'As-Is 업무 구조', ac:'--s1'},
   {id:'02', page:BASE + 'step2.html', label:'STEP 02', name:'Workflow 진단', ac:'--s2'},
   {id:'03', page:BASE + 'step3.html', label:'STEP 03', name:'핵심 문제', ac:'--s3'},
-  {id:'04', page:BASE + 'step4.html', label:'STEP 04', name:'근본 원인', ac:'--s4'}
+  {id:'04', page:BASE + 'step4.html', label:'STEP 04', name:'근본 원인', ac:'--s4'},
+  {id:'05', page:BASE + 'step5.html', label:'STEP 05', name:'실행 지식', ac:'--s5'}
 ];
 const S = {files:{}, at:null, wfs:{}, wfNames:[], skills:{}, wf:null, stage:'00', view:'viz', sel:null, filter:null, skillKey:{}};
 const W = () => S.wfs[S.wf] || {};
@@ -371,7 +419,7 @@ function ingest(files, at){
     const wf = doc.fm.workflow || base.replace(/^0\d_[a-z_]+?_/,'').replace(/\.md$/,'');
     const Wf = S.wfs[wf] = S.wfs[wf] || {};
     let parsed = null, err = null;
-    try { parsed = ({'01':p01,'02':p02,'03':p03,'04':p04}[n] || (()=>null))(doc); } catch(e){ err = e; console.warn(e); }
+    try { parsed = ({'01':p01,'02':p02,'03':p03,'04':p04,'05':p05}[n] || (()=>null))(doc); } catch(e){ err = e; console.warn(e); }
     Wf[n] = {doc, p:parsed, err, path:p, base};
   });
   S.wfNames = Object.keys(S.wfs);
@@ -410,12 +458,13 @@ function renderTop(){
 function countRC(t){ let n = t.rc ? 1 : 0; (t.kids||[]).forEach(k => n += countRC(k)); return n; }
 function railKV(id){
   const e = W()[id], p = P(id), fm = e ? e.doc.fm : {};
-  if(id === '00') return `${Object.keys(W()).length}/4 단계 산출물`;
+  if(id === '00') return `${Object.keys(W()).length}/${STAGES.length - 1} 단계 산출물`;
   if(!p) return '산출물 없음';
   if(id === '01') return `Task ${p.tasks.length} · Action ${p.actions.length} · ${fm.status||''}`;
   if(id === '02'){ const g = c => p.issues.filter(i=>i.grade===c).length; return `Issue ${p.issues.length} · A ${g('A')} / B ${g('B')}`; }
   if(id === '03') return `후보 ${p.cands.length} → 선정 1 · ${fm.status||''}`;
   if(id === '04') return `가설 ${Object.keys(p.hyps).length} → RC ${countRC(p.tree)} · ${fm.status||''}`;
+  if(id === '05') return `Action ${p.acts.length} · 지식 ${p.know.length} · 규칙 ${p.rules.length} · ${fm.status||''}`;
 }
 function renderRail(){
   $('#rail').innerHTML = STAGES.map(s => {
@@ -532,6 +581,8 @@ function opps4(p4){
 
 function inspHTML(){
   const sel = S.sel, st = S.stage;
+  /* 페이지가 자기 항목 종류를 처리하면 그것을 씀 */
+  if(sel && PI.insp){ const h = PI.insp(sel); if(h) return h; }
   const p1 = P('01'), p2 = P('02'), p3 = P('03'), p4 = P('04');
   if(sel && sel.type === 'act' && p1){
     const a = p1.actions.find(x => x.id === sel.id); if(!a) return inspDefault(st);
@@ -636,7 +687,7 @@ const SHELL = `
     <div class="logo" style="margin:0 auto;width:40px;height:40px;font-size:15px;border-radius:10px">PI</div>
     <h1>분석 폴더를 불러오세요</h1>
     <p>브라우저는 보안상 이 HTML 옆의 파일을 스스로 읽을 수 없어서, 처음 한 번만 폴더를 선택해야 합니다.</p>
-    <p>한 번 불러오면 모든 페이지(전체, STEP 01~04)에서 같은 내용을 씁니다. 파일은 어디에도 전송되지 않습니다.</p>
+    <p>한 번 불러오면 모든 페이지(전체, STEP 01~05)에서 같은 내용을 씁니다. 파일은 어디에도 전송되지 않습니다.</p>
     <div class="path"><b>workflow3</b> 폴더 전체를 선택하면 → 산출물(<code>output/</code>)과 스킬 정의(<code>.github/skills/</code>)를 함께 읽습니다<br><b>output</b> 폴더만 선택해도 → 산출물 화면은 모두 볼 수 있습니다</div>
     <div class="acts"><button class="btn primary" id="pickBtn" type="button">폴더 선택</button></div>
     <p style="margin-top:12px;font-size:12px;color:var(--faint)">또는 폴더를 이 상자에 끌어다 놓으세요</p>
@@ -658,7 +709,7 @@ async function acceptFiles(list){
   $('#err').textContent = '';
   const files = await readFileList(list);
   if(!Object.keys(files).length){
-    $('#err').textContent = '이 폴더에서 산출물 md(01_~04_*.md)나 SKILL.md를 찾지 못했습니다. workflow3 또는 output 폴더를 선택해 주세요.';
+    $('#err').textContent = '이 폴더에서 산출물 md(01_~05_*.md)나 SKILL.md를 찾지 못했습니다. workflow3 또는 output 폴더를 선택해 주세요.';
     $('#loader').classList.remove('hide'); return;
   }
   const at = new Date().toISOString(); saveCache(files, at); ingest(files, at);
@@ -690,6 +741,6 @@ PI.load = files => { const at = new Date().toISOString(); saveCache(files, at); 
 
 /* 페이지 스크립트에서 쓰는 도구 */
 PI.rerender = () => { renderCanvas(); renderInsp(); };
-Object.assign(PI, {scoreLevel, scoreColor});
+Object.assign(PI, {scoreLevel, scoreColor, expandIds, st5, RE_KREC});
 Object.assign(PI, {S, W, P, STAGES, stageOf, esc, md, inline, bget, ids, clip, isSel, countRC, vdClass, opps4, kv, link, RE_ACT, RE_ISS});
 })();

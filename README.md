@@ -5,10 +5,10 @@
 
 ## 한눈에 보기
 
-[docs/index.html](docs/index.html)을 브라우저(Chrome·Edge)로 열고 `workflow3` 폴더(또는 `output` 폴더)를 한 번 선택하면, `output/`의 실제 산출물 md와 `.github/skills/`의 SKILL.md를 읽어 시각화합니다. 한 번 불러온 내용은 모든 페이지에서 함께 씁니다.
+최상위의 [skill-guide.html](skill-guide.html)을 브라우저(Chrome·Edge)로 열고 `workflow3` 폴더(또는 `output` 폴더)를 한 번 선택하면, `output/`의 실제 산출물 md와 `.github/skills/`의 SKILL.md를 읽어 시각화합니다. 한 번 불러온 내용은 모든 페이지에서 함께 씁니다.
 
-- 페이지: `index.html`(전체) · `step1.html`(업무 구조) · `step2.html`(진단) · `step3.html`(핵심 문제) · `step4.html`(근본 원인). 상단 단계 바로 이동합니다.
-- 공통 파일: `common.css`(디자인), `common.js`(파일 읽기·md 파싱·상단 바·상세 패널). 페이지별 화면은 `overview.js`, `step1.js` ~ `step4.js`에 있습니다.
+- 페이지: `skill-guide.html`(전체, 최상위) · `docs/step1.html`(업무 구조) · `docs/step2.html`(진단) · `docs/step3.html`(핵심 문제) · `docs/step4.html`(근본 원인). 상단 단계 바로 이동합니다.
+- 공통 파일: `docs/common.css`(디자인), `docs/common.js`(파일 읽기·md 파싱·상단 바·상세 패널). 페이지별 화면은 `docs/overview.js`, `docs/step1.js` ~ `docs/step4.js`에 있습니다.
 - 항목(Action, Issue, 후보, 원인 가설)을 누르면 오른쪽 패널에 상세 값과 연결된 단계가 표시됩니다.
 - 각 단계에서 `산출물 원문`, `스킬 절차` 탭으로 원본 md도 볼 수 있습니다.
 - 외부 라이브러리 없이 HTML 파일 하나로 동작하며, 파일은 브라우저 밖으로 전송되지 않습니다. md를 고친 뒤에는 `폴더 다시 불러오기`를 누릅니다.
@@ -39,6 +39,8 @@
 ## 폴더 구조
 
 ```
+skill-guide.html  산출물 뷰어 시작 페이지 (전체)
+docs/             뷰어 단계 페이지(step1~4.html)와 공통 css·js
 .github/skills/   스킬 정의 (SKILL.md)
 .vscode/mcp.json  MCP 서버 설정 (Atlassian)
 input/            고객 자료 등 입력 파일 (Git 제외)

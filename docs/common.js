@@ -342,12 +342,15 @@ function parseSkill(text){
 }
 
 /* ---------- 5. 상태 ---------- */
+/* 전체 페이지(skill-guide.html)는 저장소 최상위에, 단계 페이지는 docs/ 에 있다. 최상위 페이지는 data-base="docs/" 를 준다. */
+const BASE = document.body.dataset.base || '';
+const HOME = BASE ? 'skill-guide.html' : '../skill-guide.html';
 const STAGES = [
-  {id:'00', page:'index.html', label:'전체', name:'한눈에 보기', ac:'--s0'},
-  {id:'01', page:'step1.html', label:'STEP 01', name:'As-Is 업무 구조', ac:'--s1'},
-  {id:'02', page:'step2.html', label:'STEP 02', name:'Workflow 진단', ac:'--s2'},
-  {id:'03', page:'step3.html', label:'STEP 03', name:'핵심 문제', ac:'--s3'},
-  {id:'04', page:'step4.html', label:'STEP 04', name:'근본 원인', ac:'--s4'}
+  {id:'00', page:HOME, label:'전체', name:'한눈에 보기', ac:'--s0'},
+  {id:'01', page:BASE + 'step1.html', label:'STEP 01', name:'As-Is 업무 구조', ac:'--s1'},
+  {id:'02', page:BASE + 'step2.html', label:'STEP 02', name:'Workflow 진단', ac:'--s2'},
+  {id:'03', page:BASE + 'step3.html', label:'STEP 03', name:'핵심 문제', ac:'--s3'},
+  {id:'04', page:BASE + 'step4.html', label:'STEP 04', name:'근본 원인', ac:'--s4'}
 ];
 const S = {files:{}, at:null, wfs:{}, wfNames:[], skills:{}, wf:null, stage:'00', view:'viz', sel:null, filter:null, skillKey:{}};
 const W = () => S.wfs[S.wf] || {};
@@ -615,7 +618,7 @@ function inspDefault(st){
 const SHELL = `
 <div class="app" id="app">
   <header class="top">
-    <a class="brand" href="index.html" style="text-decoration:none;color:inherit"><div class="logo">PI</div><b>업무분석·개선 뷰어</b></a>
+    <a class="brand" href="${HOME}" style="text-decoration:none;color:inherit"><div class="logo">PI</div><b>업무분석·개선 뷰어</b></a>
     <div class="wf" id="wfBox"></div>
     <div class="sp"></div>
     <span class="meta" id="meta"></span>

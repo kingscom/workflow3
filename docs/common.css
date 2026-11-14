@@ -446,3 +446,40 @@ body[data-insp="drawer"] .insp.open{transform:none}
 .hm .tg small{font-weight:600;color:var(--faint);margin-left:4px}
 .qscale{display:inline-flex;gap:1px;vertical-align:-2px;margin-right:4px}
 .qscale i{width:14px !important;height:12px !important;border-radius:2px !important;margin:0 !important}
+
+/* ── STEP 03: 끌고 온 경로 */
+.path3{display:grid;grid-template-columns:minmax(0,1fr) 20px minmax(0,1.25fr) 20px minmax(0,.9fr) 20px minmax(0,1.1fr);gap:6px;align-items:start}
+.p3arrow{align-self:center;text-align:center;color:var(--faint);font-size:18px;font-weight:700}
+.p3col{min-width:0;display:flex;flex-direction:column;gap:6px}
+.p3h{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:800}
+.p3h small{font-weight:400;color:var(--faint);font-size:11px}
+.p3h .n{font-style:normal;width:18px;height:18px;border-radius:50%;background:var(--s3);color:#fff;font-size:11px;display:grid;place-items:center;flex:none}
+.p3item{display:block;width:100%;text-align:left;border:1px solid var(--line);border-left:3px solid var(--s4);background:var(--s4s);border-radius:8px;padding:6px 9px;font-size:12.5px;line-height:1.45}
+.p3item b{margin-right:5px;color:var(--s4);font-size:12px}
+.p3item .tag{margin-right:3px}
+.p3item small{display:block;color:var(--faint);font-size:11px;margin-top:2px}
+.p3item.core{background:var(--s4);border-color:var(--s4);color:#fff;font-weight:600}
+.p3item.core b{color:#fff}
+.p3item.core small{color:rgba(255,255,255,.8)}
+.p3item.warn{background:var(--sunken);border-left-color:var(--warn);color:var(--muted)}
+.p3item.warn b{color:var(--warn)}
+.p3item:hover{box-shadow:var(--shadow2)}
+.p3item.sel{outline:2px solid var(--text);outline-offset:1px}
+.p3funnel{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--muted)}
+.p3funnel span{background:var(--sunken);border-radius:6px;padding:3px 8px}
+.p3funnel span:nth-child(1){width:100%}.p3funnel span:nth-child(2){width:80%}.p3funnel span:nth-child(3){width:55%;background:var(--s3s);color:var(--s3)}
+.p3funnel b{color:var(--text)}
+.p3col.tgt .p3item{font-size:12.8px}
+.p3why{font-size:11.5px;color:var(--faint)}
+.tmap3{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:6px}
+.tm3{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:7px 6px;min-width:0}
+.tm3.off{opacity:.55}
+.tm3-h{font-size:11.5px;font-weight:700;line-height:1.3;height:31px;overflow:hidden;margin-bottom:2px}
+.tm3-h b{color:var(--s1);margin-right:3px}
+.tm3 .ta{font-size:11.5px;padding:3px 5px;margin-top:3px}
+.tm3 .ta-n{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tm3 .ta-id{width:16px}
+@media (max-width:1280px){ .tmap3{grid-template-columns:repeat(4,minmax(0,1fr))} }
+@media (max-width:1100px){ .path3{grid-template-columns:1fr} .p3arrow{transform:rotate(90deg)} }
+.cand-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+@media (max-width:1280px){ .cand-grid{grid-template-columns:repeat(2,minmax(0,1fr))} }

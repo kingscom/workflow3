@@ -22,7 +22,7 @@
 | 순서 | 스킬 | 하는 일 | 산출물 |
 |---|---|---|---|
 | 01 | [01-as-is-interview-consultant](.github/skills/01-as-is-interview-consultant/SKILL.md) | 업무를 Task·Action(L5)까지 분해하고 담당자 확인을 받아 As-Is 구조를 정리 | `output/01_l5_{Workflow명}.md` |
-| 02 | [02-workflow-diagnosis-consultant](.github/skills/02-workflow-diagnosis-consultant/SKILL.md) | As-Is 구조를 7개 영역으로 진단해 문제 가설(Issue)과 개선 기회를 점수화 | `output/02_diagnosis_{Workflow명}.md` |
+| 02 | [02-workflow-diagnosis-consultant](.github/skills/02-workflow-diagnosis-consultant/SKILL.md) | 모든 Action을 6개 영역별 0~100점으로 보수적으로 채점하고, 이를 문제 가설(Issue)로 묶어 개선 기회와 함께 점수화 | `output/02_diagnosis_{Workflow명}.md` |
 | 03 | [03-problem-discovery-interview](.github/skills/03-problem-discovery-interview/SKILL.md) | 문제 후보를 고객 경험으로 검증·구체화·비교해 집중 분석할 문제 1개(Target Problem)를 합의 | `output/03_target_problem_{Workflow명}.md` |
 | 04 | [04-root-cause-deep-dive](.github/skills/04-root-cause-deep-dive/SKILL.md) | 원인 가설을 세우고 실제 사례로 검증해 Root Cause Map, 개선 방향, 성공 기준을 합의 | `output/04_problem_brief_{Workflow명}.md` |
 

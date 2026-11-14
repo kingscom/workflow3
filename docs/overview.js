@@ -80,6 +80,7 @@ PI.view = function(){
   /* ── 3. Task별 업무 지도 */
   if(p1){
     const heat = {}; if(p2 && p2.heat) p2.heat.rows.forEach(r => heat[r.id] = r.total);
+    const heatLabel = p2 && p2.heat && p2.heat.scale === 100 ? '최고 종합' : '신호';
     const maxHeat = Math.max(1, ...Object.values(heat));
     const tasks = p1.tasks.map((t, i) => {
       const lv = t.actions.map(a => level(a.id, f));
@@ -98,7 +99,7 @@ PI.view = function(){
       const cls = x.hasCore ? 'core' : x.hasRel ? 'rel' : '';
       h += `<div class="tm ${cls}">
         <div class="tm-h"><span class="tm-r">${SORT==='issue' ? rank + 1 : ''}</span><span class="tm-id">${t.id}</span><span class="tm-n">${esc(t.name)}</span></div>
-        <div class="tm-s"><span class="tm-bar"><i style="width:${x.heat/maxHeat*100}%"></i></span><span>신호 ${x.heat}</span><span>Issue 연결 ${x.issueActs}/${t.actions.length}</span></div>`;
+        <div class="tm-s"><span class="tm-bar"><i style="width:${x.heat/maxHeat*100}%"></i></span><span>${esc(heatLabel)} ${x.heat}</span><span>Issue 연결 ${x.issueActs}/${t.actions.length}</span></div>`;
       acts.forEach(a => {
         const lv = level(a.id, f);
         const hit = selIssue ? (selIssue.acts.includes(a.id) ? 'hit' : 'dim') : '';

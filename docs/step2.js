@@ -1,6 +1,7 @@
 /* STEP 02 — Workflow 진단
    한 장의 히트맵: 가로 = Task별 Action(01 md), 세로 = 진단 영역 6개 + Issue(점수 큰 순)
-   - 영역 띠: 02 md '3. Task별 진단 요약'의 Task 점수(0~3)를 그 Task의 Action 칸에 걸쳐 표시
+   - 영역 점수: 02 md '6. Action별 진단표'에 Action마다 영역 점수(0~100)와 종합이 있으면 Action 칸마다 표시.
+     없으면(예전 형식) '3. Task별 진단 요약'의 Task 점수를 그 Task의 Action 칸에 걸쳐 표시
    - Issue 칸: 02 md '4. Issue List'의 관련 Action = 진한 칸, '6. Action별 진단표'에서만 연결 = 연한 점
    항목을 누르면 오른쪽 패널에 상세가 표시된다. */
 (function(){
@@ -35,12 +36,15 @@ PI.view = function(p){
   const anySel = hlCols.size || hlRows.size;
   const colCls = (a, first) => (first ? 'first ' : '') + (hlCols.has(a) ? 'colhl' : anySel ? 'dimc' : '');
 
+  const taskTop = id => { const r = p.heat && p.heat.rows.find(x => x.id === id); return r && !isNaN(r.total) ? r.total : null; };
   const flat = cols.flatMap(t => t.acts.map((a, i) => ({...a, task:t.id, first:i === 0})));
   const totalCols = flat.length + 1;
 
   let h = `<div class="ins-line ${INS_OPEN?'open':''}" id="insLine" title="눌러서 펼치기/접기"><b class="k">종합 인사이트</b><div class="md">${md(p.insight)}</div><span class="more">${INS_OPEN?'접기 ▲':'펼치기 ▼'}</span></div>`;
   h += `<div class="hm-legend"><b style="color:var(--text)">Task·Action × 진단 히트맵</b>
-    <span><i style="background:var(--h1)"></i><i style="background:var(--h2)"></i><i style="background:var(--h3)"></i>영역 신호 1~3 (Task 단위)</span>
+    ${p.hasActScores
+      ? `<span><span class="qscale"><i class="q1"></i><i class="q2"></i><i class="q3"></i><i class="q4"></i></span>영역 점수 1~29 · 30~49 · 50~74 · 75~100 (Action 단위)</span>`
+      : `<span><i style="background:var(--h1)"></i><i style="background:var(--h2)"></i><i style="background:var(--h3)"></i>영역 신호 (Task 단위)</span>`}
     <span><i style="background:var(--gA)"></i>A등급 Issue의 관련 Action</span><span><i style="background:var(--gB)"></i>B등급</span>
     <span><i style="background:var(--gA);opacity:.32;border-radius:50%;width:10px;height:10px"></i>Action별 진단표에서만 연결</span>
     <span style="margin-left:auto;color:var(--faint)">Task·Action 이름이나 Issue를 누르면 연결된 칸이 강조되고 상세가 열립니다</span></div>`;
@@ -49,17 +53,30 @@ PI.view = function(p){
   h += `<div class="hm-wrap"><table class="hm"><colgroup><col class="hm-labcol">${flat.map(() => '<col>').join('')}</colgroup><thead>`;
   /* 1행: Task 묶음 */
   h += `<tr><th class="lab" rowspan="2">세로: 진단 영역 · Issue<br>가로: Task → Action</th>${cols.map(t =>
-    `<th class="tg ${hlCols.size && t.acts.every(a => hlCols.has(a.id)) ? 'colhl' : ''}" colspan="${t.acts.length}" data-sel="task|${t.id}" title="${esc(t.id + '. ' + t.name)}"><b>${t.id}</b>${esc(t.name)}</th>`).join('')}</tr>`;
+    `<th class="tg ${hlCols.size && t.acts.every(a => hlCols.has(a.id)) ? 'colhl' : ''}" colspan="${t.acts.length}" data-sel="task|${t.id}" title="${esc(t.id + '. ' + t.name)}${taskTop(t.id) != null ? ' · ' + esc(p.heat.totalLabel) + ' ' + taskTop(t.id) : ''}"><b>${t.id}</b>${esc(t.name)}</th>`).join('')}</tr>`;
   /* 2행: Action 이름(세로 글씨) */
   h += `<tr>${flat.map(a => `<th class="ah ${a.star?'star':''} ${colCls(a.id, a.first)}" data-sel="act|${a.id}" title="${esc(a.id + ' ' + a.name)}"><span>${esc(clip(a.name, 12))}</span><small>${a.id.split('-')[1]}</small></th>`).join('')}</tr></thead><tbody>`;
 
-  /* 영역 띠 */
-  if(p.heat){
-    h += `<tr class="sec"><td colspan="${totalCols}">진단 영역 신호 <small>Task별 최고 점수 0(없음)~3(강함) · 02 md 3장</small></td></tr>`;
+  if(p.hasActScores){
+    /* Action 단위 영역 점수 + 종합 */
+    h += `<tr class="sec"><td colspan="${totalCols}">Action별 영역 점수 <small>0(없음)~100(강함) · 빈 칸 = 0 · 02 md 6장 Action별 진단표</small></td></tr>`;
+    const cell = (a, v, extra) => {
+      const d = p.actDiag[a.id];
+      const dim = anySel && !hlCols.has(a.id);
+      return `<td class="sv q${PI.scoreLevel(v)} ${a.first?'first':''} ${dim?'dimc':''} ${extra||''}" data-sel="act|${a.id}" title="${esc(a.id + ' ' + a.name + (d && d.diag ? '\n' + d.diag : ''))}">${v == null || isNaN(v) ? '' : v}</td>`;
+    };
+    p.areaNames.forEach((area, ai) => {
+      h += `<tr><td class="lab alab">${esc(area)}</td>${flat.map(a => { const d = p.actDiag[a.id]; return cell(a, d && d.scores ? d.scores[ai] : null); }).join('')}</tr>`;
+    });
+    h += `<tr class="tot"><td class="lab alab">종합</td>${flat.map(a => { const d = p.actDiag[a.id]; return cell(a, d ? d.total : null); }).join('')}</tr>`;
+  } else if(p.heat){
+    /* 예전 형식: Task 단위 신호 */
+    const sc = p.heat.scale;
+    h += `<tr class="sec"><td colspan="${totalCols}">진단 영역 신호 <small>Task별 최고 점수 0~${sc} · 02 md 3장</small></td></tr>`;
     p.heat.areas.forEach((area, ai) => {
       h += `<tr><td class="lab alab">${esc(area)}</td>${cols.map(t => {
         const r = p.heat.rows.find(x => x.id === t.id); const v = r ? r.vals[ai] : NaN;
-        const vv = isNaN(v) ? 0 : Math.max(0, Math.min(3, v));
+        const vv = isNaN(v) ? 0 : Math.max(0, Math.min(3, sc === 100 ? Math.ceil(v / 34) : v));
         return `<td class="area v${vv} ${hlCols.size && !t.acts.some(a => hlCols.has(a.id)) ? 'dimc' : ''}" colspan="${t.acts.length}" data-sel="task|${t.id}" style="cursor:pointer">${isNaN(v) ? '' : v || ''}</td>`;
       }).join('')}</tr>`;
     });

@@ -231,7 +231,9 @@ function parseAction(id, rest, task){
 
 function p02(doc){
   const hs = sec(doc, 'Task별'); const ht = hs ? tables(hs.body)[0] : null;
-  const heat = ht ? {areas: ht.head.slice(1, -1), rows: ht.rows.map(r => ({task:r[0], id:(r[0].match(/T\d+/)||[])[0], vals:r.slice(1,-1).map(Number), total:Number(r[r.length-1])}))} : null;
+  /* 점수 척도: 예전 형식은 0~3, 새 형식은 0~100. 표 안 최댓값으로 판단 */
+  const heat = ht ? {areas: ht.head.slice(1, -1), totalLabel: ht.head[ht.head.length-1], rows: ht.rows.map(r => ({task:r[0], id:(r[0].match(/T\d+/)||[])[0], vals:r.slice(1,-1).map(Number), total:Number(r[r.length-1])}))} : null;
+  if(heat) heat.scale = Math.max(0, ...heat.rows.flatMap(r => r.vals.filter(v => !isNaN(v)))) > 3 ? 100 : 3;
   const ls = sec(doc, 'Issue List'); const it = ls ? tables(ls.body)[0] : null;
   const issues = [];
   if(it){
@@ -247,13 +249,31 @@ function p02(doc){
   });
   const as = sec(doc, 'Action별'); const at = as ? tables(as.body)[0] : null;
   const actDiag = {};
-  if(at) at.rows.forEach(r => { const id = (r[0].match(RE_ACT)||[])[0]; if(id) actDiag[id] = {diag:r[1], hard:r[2], opp:r[3], iss:ids(r[4], RE_ISS)}; });
+  /* Action별 진단표: 헤더 이름으로 열을 찾음.
+     새 형식 = 6개 영역 점수(0~100) + 종합 + AI 진단 + 관련 Issue / 예전 형식 = AI 진단·예상 어려움·개선 기회·관련 Issue */
+  const areaCols = [];
+  if(at){
+    const H = at.head, c = {diag:col(H,'AI 진단'), hard:col(H,'예상 어려움'), opp:col(H,'개선 기회'), iss:col(H,'관련 Issue'), total:col(H,'종합')};
+    const areaNames = heat ? heat.areas : ['반복성','병목','중복','복잡성','판단 어려움','지식 의존성'];
+    areaNames.forEach(a => { const i = H.findIndex(h => h.replace(/\s/g,'') === a.replace(/\s/g,'')); if(i >= 0) areaCols.push({name:a, i}); });
+    at.rows.forEach(r => {
+      const id = (r[0].match(RE_ACT)||[])[0]; if(!id) return;
+      actDiag[id] = {
+        diag: c.diag >= 0 ? r[c.diag] : '', hard: c.hard >= 0 ? r[c.hard] : '', opp: c.opp >= 0 ? r[c.opp] : '',
+        iss: c.iss >= 0 ? ids(r[c.iss], RE_ISS) : [],
+        scores: areaCols.length ? areaCols.map(a => Number(r[a.i]) || 0) : null,
+        total: c.total >= 0 ? Number(r[c.total]) : null
+      };
+    });
+  }
   const act2iss = {};
   issues.forEach(is => is.acts.forEach(a => (act2iss[a] = act2iss[a] || []).push(is.id)));
   Object.entries(actDiag).forEach(([a,d]) => d.iss.forEach(i => { act2iss[a] = act2iss[a] || []; if(!act2iss[a].includes(i)) act2iss[a].push(i); }));
   return {
     insight: (sec(doc,'종합 인사이트')||{}).body || '', structure: (sec(doc,'구조 요약')||{}).body || '',
-    heat, issues, actDiag, act2iss, limits: (sec(doc,'한계')||{}).body || '', next: (sec(doc,'다음 단계')||{}).body || ''
+    heat, issues, actDiag, act2iss, areaNames: areaCols.map(a => a.name), hasActScores: areaCols.length > 0,
+    actNote: as ? as.body.split('\n').filter(l => l.trim() && !/^\s*\|/.test(l)).join('\n') : '',
+    limits: (sec(doc,'한계')||{}).body || '', next: (sec(doc,'다음 단계')||{}).body || ''
   };
 }
 
@@ -496,6 +516,9 @@ function renderInsp(){
   bindSel(el);
   const x = $('#inspClose'); if(x) x.onclick = () => { S.filter = null; select(null); };
 }
+/* 0~100 점수 → 색 (낮음 회색 ~ 높음 진한 청록) */
+function scoreLevel(v){ v = Number(v) || 0; return v >= 75 ? 4 : v >= 50 ? 3 : v >= 30 ? 2 : v > 0 ? 1 : 0; }
+function scoreColor(v){ return ['var(--line2)','var(--q2)','var(--q2)','var(--q3)','var(--q4)'][scoreLevel(v)]; }
 const kv = rows => `<dl class="kvs">${rows.filter(r => r[1]).map(r => `<dt>${r[0]}</dt><dd>${r[1]}</dd>`).join('')}</dl>`;
 const link = (type, id, stage, label) => `<span class="chip link" data-sel="${type}|${id}|${stage}">${esc(label||id)}</span>`;
 function opps4(p4){
@@ -518,7 +541,9 @@ function inspHTML(){
     if(p2){
       const d = p2.actDiag[a.id], iss = p2.act2iss[a.id] || [];
       h += `<div class="lbl">STEP 02 진단</div>`;
-      if(d) h += `<div class="box">${kv([['AI 진단', inline(d.diag)], ['예상 어려움', inline(d.hard)], ['개선 기회', inline(d.opp)]])}</div>`;
+      if(d && d.scores) h += `<div class="scorebox" style="margin-top:0;margin-bottom:8px"><div class="n">${d.total ?? '-'}</div><div><b style="font-size:13px">종합 점수</b><div class="f">최고 영역×0.7 + 둘째 영역×0.3 · 0~100</div></div></div>
+        ${p2.areaNames.map((n, i) => `<div class="axis"><span>${esc(n)}</span><span class="bg"><i style="width:${d.scores[i]}%;background:${scoreColor(d.scores[i])}"></i></span><b>${d.scores[i]}</b></div>`).join('')}`;
+      if(d) h += `<div class="box" style="margin-top:8px">${kv([['AI 진단', inline(d.diag)], ['예상 어려움', inline(d.hard)], ['개선 기회', inline(d.opp)]])}</div>`;
       h += iss.length ? `<div class="chips" style="margin-top:8px">${iss.map(i => link('issue', i, '02', i + ' ' + clip((p2.issues.find(x=>x.id===i)||{}).title, 22))).join('')}</div>` : (d ? '' : '<div class="box" style="color:var(--faint)">진단 신호 없음</div>');
     }
     return h;
@@ -542,8 +567,12 @@ function inspHTML(){
   if(sel && sel.type === 'task' && p2 && p2.heat){
     const r = p2.heat.rows.find(x => x.id === sel.id); if(!r) return inspDefault(st);
     const iss = p2.issues.filter(i => i.acts.some(a => a.startsWith(sel.id + '-')));
+    const sc = p2.heat.scale;
+    const acts = Object.entries(p2.actDiag).filter(([a, d]) => a.startsWith(sel.id + '-') && d.total != null).sort((x, y) => y[1].total - x[1].total);
+    const aname = a => (p1 && (p1.actions.find(x => x.id === a)||{}).name) || '';
     return `<div class="eyebrow" style="color:var(--s2)">TASK 진단 · ${r.id}</div><h3>${esc(r.task.replace(/^T\d+\.\s*/,''))}</h3>
-      <div class="lbl">영역별 신호</div>${p2.heat.areas.map((a,i)=>`<div class="axis"><span>${esc(a)}</span><span class="bg"><i style="width:${(r.vals[i]||0)/3*100}%"></i></span><b>${r.vals[i]}</b></div>`).join('')}
+      <div class="lbl">영역별 최고 점수 (0~${sc})</div>${p2.heat.areas.map((a,i)=>`<div class="axis"><span>${esc(a)}</span><span class="bg"><i style="width:${(r.vals[i]||0)/sc*100}%;background:${sc === 100 ? scoreColor(r.vals[i]) : 'var(--s2)'}"></i></span><b>${r.vals[i]}</b></div>`).join('')}
+      ${acts.length ? `<div class="lbl">Action 종합 점수 (큰 순)</div>${acts.map(([a, d]) => `<div class="axis" style="grid-template-columns:150px 1fr 22px;cursor:pointer" data-sel="act|${a}"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(a + ' ' + aname(a))}">${a.split('-')[1]} ${esc(aname(a))}</span><span class="bg"><i style="width:${d.total}%;background:${scoreColor(d.total)}"></i></span><b>${d.total}</b></div>`).join('')}` : ''}
       <div class="lbl">이 Task가 걸린 Issue ${iss.length}개</div><div class="chips">${iss.map(i => link('issue', i.id, '02', `${i.id} · ${i.score}`)).join('')}</div>`;
   }
   if(sel && sel.type === 'cand' && p3){
@@ -658,5 +687,6 @@ PI.load = files => { const at = new Date().toISOString(); saveCache(files, at); 
 
 /* 페이지 스크립트에서 쓰는 도구 */
 PI.rerender = () => { renderCanvas(); renderInsp(); };
+Object.assign(PI, {scoreLevel, scoreColor});
 Object.assign(PI, {S, W, P, STAGES, stageOf, esc, md, inline, bget, ids, clip, isSel, countRC, vdClass, opps4, kv, link, RE_ACT, RE_ISS});
 })();

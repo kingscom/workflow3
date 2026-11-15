@@ -64,18 +64,28 @@ code{font-family:Consolas,"D2Coding",ui-monospace,monospace;font-size:.88em;back
 .btn.primary:hover{opacity:.9;color:var(--surface)}
 
 /* ── stage rail */
-.rail{display:grid;grid-template-columns:190px repeat(5,1fr);background:var(--surface);border-bottom:1px solid var(--line);padding:0 12px}
-.st{position:relative;display:flex;gap:11px;align-items:center;text-align:left;background:none;border:none;padding:12px 14px 13px;border-bottom:3px solid transparent;min-width:0}
-.st:hover{background:var(--sunken)}
-.st.on{border-bottom-color:var(--ac)}
-.st .ix{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:12px;color:var(--ac);background:var(--acs);border:1.5px solid var(--ac)}
-.st.on .ix{background:var(--ac);color:var(--surface)}
+.rail{display:grid;grid-template-columns:190px repeat(5,1fr);gap:14px;background:var(--sunken);border-bottom:1px solid var(--line);padding:9px 14px}
+/* 단계 하나 = 누를 수 있는 카드 */
+.st{position:relative;display:flex;gap:10px;align-items:center;text-align:left;background:var(--surface);border:1px solid var(--line2);border-radius:10px;padding:8px 30px 8px 10px;min-width:0;cursor:pointer;box-shadow:0 1px 2px rgba(16,24,40,.06);transition:border-color .12s,box-shadow .12s,transform .12s}
+.st:hover{border-color:var(--ac);box-shadow:0 4px 12px rgba(16,24,40,.12);transform:translateY(-1px)}
+.st:active{transform:none}
+.st::after{content:"›";position:absolute;right:11px;top:50%;transform:translateY(-52%);font-size:20px;font-weight:700;line-height:1;color:var(--line2);transition:color .12s,right .12s}
+.st:hover::after{color:var(--ac);right:8px}
+.st.on{background:var(--ac);border-color:var(--ac);box-shadow:0 3px 10px rgba(16,24,40,.16);cursor:default;transform:none}
+.st.on::after{content:"현재";font-size:10.5px;font-weight:800;color:var(--ac);background:var(--surface);border-radius:99px;padding:2px 7px;right:9px;transform:translateY(-50%)}
+.st.on .lb,.st.on .nm,.st.on .kv{color:var(--surface)}
+.st.on .lb,.st.on .kv{opacity:.85}
+.st .ix{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:12px;color:var(--ac);background:var(--acs);border:1.5px solid var(--ac)}
+.st.on .ix{background:var(--surface);color:var(--ac);border-color:var(--surface)}
+.st.empty{background:transparent;border-style:dashed}
 .st.empty .ix{border-style:dashed;opacity:.55}
 .st .tx{min-width:0}
-.st .lb{display:block;font-size:11.5px;color:var(--faint);font-weight:600;letter-spacing:.2px}
-.st .nm{display:block;font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.st .kv{display:block;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.st + .st::before{content:"";position:absolute;left:-7px;top:50%;width:10px;height:10px;border-top:1.5px solid var(--line2);border-right:1.5px solid var(--line2);transform:translateY(-50%) rotate(45deg)}
+.st .lb{display:block;font-size:11px;color:var(--faint);font-weight:700;letter-spacing:.2px}
+.st .nm{display:block;font-weight:800;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.st:not(.on):hover .nm{color:var(--ac)}
+.st .kv{display:block;font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* 단계 사이 흐름 화살표 */
+.st + .st::before{content:"";position:absolute;left:-11px;top:50%;width:7px;height:7px;border-top:2px solid var(--faint);border-right:2px solid var(--faint);transform:translateY(-50%) rotate(45deg)}
 
 /* ── main */
 .main{display:grid;grid-template-columns:minmax(0,1fr) 380px;min-height:0}
@@ -288,7 +298,7 @@ code{font-family:Consolas,"D2Coding",ui-monospace,monospace;font-size:.88em;back
   .fc + .fc::before{display:none}
   .two,.cards3{grid-template-columns:1fr}
   .attrs{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .rail{grid-template-columns:repeat(6,minmax(150px,1fr));overflow-x:auto;padding:0}
+  .rail{grid-template-columns:repeat(6,minmax(170px,1fr));overflow-x:auto;padding:8px 12px}
   .st + .st::before{display:none}
   .skill{grid-template-columns:180px minmax(0,1fr)}
   .canvas{padding:14px 16px 20px}
@@ -308,7 +318,7 @@ code{font-family:Consolas,"D2Coding",ui-monospace,monospace;font-size:.88em;back
 
 /* 페이지 링크로 바뀐 단계 바 */
 a.st{text-decoration:none;color:inherit}
-a.st:focus-visible{outline:2px solid var(--ac);outline-offset:-2px}
+a.st:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
 
 /* ── 한눈에 보기: 문제 배너 */
 .pbanner{display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:18px;background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--s4);border-radius:14px;padding:16px 18px;box-shadow:var(--shadow)}

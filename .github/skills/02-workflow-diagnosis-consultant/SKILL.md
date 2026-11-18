@@ -178,6 +178,7 @@ Task별 진단 요약도 만든다: Task마다 6개 영역별로 그 Task 안 Ac
 **저장 규칙**
 - 파일명은 `02_diagnosis_{Workflow명}.md`(공백은 `_`). 다시 진단하면 같은 파일을 덮어쓰고 `updated`만 바꾼다.
 - 저장 위치는 As-Is md와 같은 `output/` 폴더다. 폴더가 없으면 만든다. Write 도구로 만들고 SendUserFile로 보낸다. 고객 컴퓨터가 연결되어 있고 폴더를 지정했으면 그곳에도 저장하고 위치를 평이한 말로 알린다.
+- md를 저장한 뒤 작업 디렉터리에 `build-data.ps1`이 있으면 `powershell -ExecutionPolicy Bypass -File build-data.ps1`을 실행해 뷰어 데이터(`docs/data.js`)를 갱신하고, 브라우저를 새로고침하면 보인다고 알린다.
 - Issue ID는 우선순위 점수가 높은 순으로 `I1, I2, …`를 붙인다.
 - 모르는 값은 `미확인`으로 적는다.
 

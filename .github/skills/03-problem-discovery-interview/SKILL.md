@@ -153,6 +153,7 @@ Target Problem을 md로 저장해 보내고(아래 '결과 저장'), 대화에�
 **저장 규칙**
 - 파일명은 `03_target_problem_{Workflow명}.md`(공백은 `_`). 갱신할 때는 같은 파일을 덮어쓰고 `updated`만 바꾼다.
 - 작업 디렉터리에 Write 도구로 만들고 SendUserFile로 보낸다. 고객 컴퓨터가 연결되어 있고 폴더를 지정했으면 그곳에도 저장하고 위치를 평이한 말로 알린다.
+- md를 저장한 뒤 작업 디렉터리에 `build-data.ps1`이 있으면 `powershell -ExecutionPolicy Bypass -File build-data.ps1`을 실행해 뷰어 데이터(`docs/data.js`)를 갱신하고, 브라우저를 새로고침하면 보인다고 알린다.
 - 저장 시점은 핵심 문제 합의가 끝났을 때와 세션을 중단할 때다.
 - 대화 기록을 통째로 넣지 않는다. 고객의 말은 근거가 되는 것만 짧게 옮긴다.
 - 모르는 값은 `미확인`으로 적는다.

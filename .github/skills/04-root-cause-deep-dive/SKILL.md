@@ -185,6 +185,7 @@ Root Cause Map과 Problem Definition Brief를 파일 하나에 담는다. 고객
 **저장 규칙**
 - 파일명은 `04_problem_brief_{Workflow명}.md`(공백은 `_`). 갱신할 때는 같은 파일을 덮어쓰고 `updated`만 바꾼다.
 - 작업 디렉터리에 Write 도구로 만들고 SendUserFile로 보낸다. 고객 컴퓨터가 연결되어 있고 폴더를 지정했으면 그곳에도 저장하고 위치를 평이한 말로 알린다.
+- md를 저장한 뒤 작업 디렉터리에 `build-data.ps1`이 있으면 `powershell -ExecutionPolicy Bypass -File build-data.ps1`을 실행해 뷰어 데이터(`docs/data.js`)를 갱신하고, 브라우저를 새로고침하면 보인다고 알린다.
 - 저장 시점은 성공 기준 합의가 끝났을 때와 세션을 중단할 때다.
 - Brief(1장)는 한 화면에 들어오는 분량으로 쓴다. 근거와 경과는 뒤 장에 둔다.
 - 기각된 가설도 지우지 않고 이유와 함께 남긴다. 무엇을 검토했는지가 결론의 신뢰를 만든다.

@@ -691,6 +691,7 @@ const SHELL = `
     <div class="path"><b>workflow3</b> 폴더 전체를 선택하면 → 산출물(<code>output/</code>)과 스킬 정의(<code>.github/skills/</code>)를 함께 읽습니다<br><b>output</b> 폴더만 선택해도 → 산출물 화면은 모두 볼 수 있습니다</div>
     <div class="acts"><button class="btn primary" id="pickBtn" type="button">폴더 선택</button></div>
     <p style="margin-top:12px;font-size:12px;color:var(--faint)">또는 폴더를 이 상자에 끌어다 놓으세요</p>
+    <p style="font-size:12px;color:var(--faint)">파일 선택이 막힌 환경이면 workflow3 폴더에서 <code>powershell -ExecutionPolicy Bypass -File build-data.ps1</code> 실행 후 새로고침</p>
     <div class="err" id="err"></div>
   </div>
 </div>
@@ -720,7 +721,7 @@ PI.start = function(){
   document.body.insertAdjacentHTML('afterbegin', SHELL);
   applyTheme();
   $('#pickBtn').onclick = () => $('#dirInput').click();
-  $('#reloadBtn').onclick = () => $('#dirInput').click();
+  $('#reloadBtn').onclick = () => window.PI_DATA ? location.reload() : $('#dirInput').click();
   $('#dirInput').onchange = e => { if(e.target.files.length) acceptFiles([...e.target.files]); e.target.value = ''; };
   const drop = $('#drop');
   ['dragenter','dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
@@ -733,6 +734,8 @@ PI.start = function(){
   });
   document.addEventListener('keydown', e => { if(e.key === 'Escape' && S.sel){ S.filter = null; select(null); } });
   window.addEventListener('hashchange', () => { readHash(); renderCanvas(); renderInsp(); });
+  // build-data.ps1 로 만든 docs/data.js 가 있으면 파일 선택 없이 바로 사용
+  if(window.PI_DATA && window.PI_DATA.files){ ingest(window.PI_DATA.files, window.PI_DATA.at); return; }
   const cached = loadCache();
   if(cached) ingest(cached.files, cached.at);
 };
